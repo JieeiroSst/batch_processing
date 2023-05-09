@@ -1,26 +1,26 @@
 package model
 
 type Weather struct {
-	MinTemp       float64
-	MaxTemp       float64
-	Rainfall      float64
-	Evaporation   float64
-	Sunshine      float64
+	MinTemp       string
+	MaxTemp       string
+	Rainfall      string
+	Evaporation   string
+	Sunshine      string
 	WindGustDir   string
-	WindGustSpeed float64
+	WindGustSpeed string
 	WindDir9am    string
 	WindDir3pm    string
-	WindSpeed9am  float64
-	WindSpeed3pm  float64
-	Humidity9am   float64
-	Humidity3pm   float64
-	Pressure9am   float64
-	Pressure3pm   float64
-	Cloud9am      float64
-	Cloud3pm      float64
-	Temp9am       float64
-	Temp3pm       float64
-	RainToday     bool
-	RISK_MM       float64
-	RainTomorrow  bool
+	WindSpeed9am  string
+	WindSpeed3pm  string
+	Humidity9am   string
+	Humidity3pm   string
+	Pressure9am   string
+	Pressure3pm   string
+	Cloud9am      string
+	Cloud3pm      string
+	Temp9am       string
+	Temp3pm       string
+	RainToday     string
+	RISK_MM       string
+	RainTomorrow  string
 }
