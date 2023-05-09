@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"strings"
@@ -14,7 +13,7 @@ type repository struct {
 }
 
 type Repository interface {
-	CreateOrderInstantCard(ctx context.Context, req []model.Weather) error
+	CreateOrderInstantCard(req []model.Weather) error
 }
 
 func NewRepository(db *sql.DB) Repository {
@@ -23,11 +22,11 @@ func NewRepository(db *sql.DB) Repository {
 	}
 }
 
-func (r *repository) CreateOrderInstantCard(ctx context.Context, req []model.Weather) error {
+func (repo *repository) CreateOrderInstantCard(wallets []model.Weather) error {
 	valueStrings := []string{}
 	valueArgs := []interface{}{}
-	for _, w := range req {
-		valueStrings = append(valueStrings, "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	for _, w := range wallets {
+		valueStrings = append(valueStrings, "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 
 		valueArgs = append(valueArgs, w.MinTemp)
 		valueArgs = append(valueArgs, w.MaxTemp)
@@ -52,18 +51,18 @@ func (r *repository) CreateOrderInstantCard(ctx context.Context, req []model.Wea
 		valueArgs = append(valueArgs, w.RISK_MM)
 		valueArgs = append(valueArgs, w.RainTomorrow)
 	}
-
 	smt := `INSERT INTO weathers(min_temp,max_temp,rainfall,evaporation,sunshine,wind_gust_dir
 		,wind_gust_speed,wind_dir_9_am,wind_dir_3_pm,wind_speed_9_am,wind_speed_3_pm
 		,humidity_9_am,humidity_3_pm,pressure_9_am,pressure_3_pm,cloud_9_am
 		,cloud_3_pm,temp_9_am,temp_3_pm,rain_today,risk_mm,rain_tomorrow) VALUES %s`
 
 	smt = fmt.Sprintf(smt, strings.Join(valueStrings, ","))
-	tx, _ := r.db.Begin()
-	_, err := tx.Exec(smt, valueArgs...)
+	tx, _ := repo.db.Begin()
+	row, err := tx.Exec(smt, valueArgs...)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
-	return nil
+	fmt.Println(row.LastInsertId())
+	return tx.Commit()
 }

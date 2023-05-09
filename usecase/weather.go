@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"sync"
@@ -58,10 +57,10 @@ func (u *usecase) upsertBigQueryWeather(weathers []dto.WeatherRequestDTO) {
 		}
 		weatherModels = append(weatherModels, weatherModel)
 	}
-	if err := u.repository.CreateOrderInstantCard(context.Background(), weatherModels); err != nil {
+	fmt.Println(weatherModels)
+	if err := u.repository.CreateOrderInstantCard(weatherModels); err != nil {
 		log.Println(err)
 	}
-	fmt.Println()
 }
 
 func (u *usecase) processWeather(weathers <-chan dto.WeatherRequestDTO, batchSize int) {
@@ -79,6 +78,7 @@ func (u *usecase) processWeather(weathers <-chan dto.WeatherRequestDTO, batchSiz
 }
 
 func (u *usecase) produceWeather(weathers []dto.WeatherRequestDTO, to chan dto.WeatherRequestDTO) {
+	defer close(to)
 	for _, weather := range weathers {
 		to <- dto.WeatherRequestDTO{
 			MinTemp:       weather.MinTemp,

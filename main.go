@@ -5,6 +5,8 @@ import (
 	"embed"
 	"fmt"
 	"log"
+	"net/http"
+	"time"
 
 	"github.com/JIeeiroSst/upload/infrastructure"
 	"github.com/JIeeiroSst/upload/repository"
@@ -21,8 +23,6 @@ func main() {
 
 	weatherList := utils.CreateWeatherList(file)
 
-	fmt.Println(":========", weatherList)
-
 	infrastructure.LoadEnv()
 	database := infrastructure.NewDatabase()
 	CreateTable(database.DB)
@@ -30,7 +30,19 @@ func main() {
 	repository := repository.NewRepository(database.DB)
 	usecase := usecase.NewUsecase(repository)
 
+	start := time.Now()
 	usecase.InsertWeather(weatherList)
+	end := time.Now()
+
+	fmt.Println("====== TIME ", end.Sub(start).Milliseconds())
+
+	router.GET("/upload", func(c *gin.Context) {
+		usecase.InsertWeather(weatherList)
+		c.JSON(http.StatusOK, gin.H{
+			"message": "pong",
+		})
+	})
+
 	router.Run(":8000")
 }
 
