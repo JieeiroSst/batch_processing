@@ -40,3 +40,14 @@ type FilterWeather struct {
 	CreatedBefore time.Time
 }
 
+type ValidationError struct {
+	Index   int
+	Field   string
+	Message string
+}
+
+type ValidationResult struct {
+	ValidData   []WeatherRequestDTO
+	InvalidData []WeatherRequestDTO
+	Errors      []ValidationError
+}

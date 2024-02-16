@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"strings"
@@ -13,7 +14,8 @@ type repository struct {
 }
 
 type Repository interface {
-	CreateOrderInstantCard(req []model.Weather) error
+	CreateOrderInstantCardTx(tx *sql.Tx, weathers []model.Weather) error
+	BeginTx(ctx context.Context) (*sql.Tx, error)
 }
 
 func NewRepository(db *sql.DB) Repository {
@@ -22,10 +24,14 @@ func NewRepository(db *sql.DB) Repository {
 	}
 }
 
-func (repo *repository) CreateOrderInstantCard(wallets []model.Weather) error {
+func (r *repository) BeginTx(ctx context.Context) (*sql.Tx, error) {
+	return r.db.BeginTx(ctx, nil)
+}
+
+func (repo *repository) CreateOrderInstantCardTx(tx *sql.Tx, weathers []model.Weather) error {
 	valueStrings := []string{}
 	valueArgs := []interface{}{}
-	for _, w := range wallets {
+	for _, w := range weathers {
 		valueStrings = append(valueStrings, "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 
 		valueArgs = append(valueArgs, w.MinTemp)
@@ -57,12 +63,10 @@ func (repo *repository) CreateOrderInstantCard(wallets []model.Weather) error {
 		,cloud_3_pm,temp_9_am,temp_3_pm,rain_today,risk_mm,rain_tomorrow) VALUES %s`
 
 	smt = fmt.Sprintf(smt, strings.Join(valueStrings, ","))
-	tx, _ := repo.db.Begin()
-	row, err := tx.Exec(smt, valueArgs...)
+	_, err := tx.Exec(smt, valueArgs...)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
-	fmt.Println(row.LastInsertId())
-	return tx.Commit()
+
+	return nil
 }

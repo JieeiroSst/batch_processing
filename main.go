@@ -36,10 +36,22 @@ func main() {
 
 	fmt.Println("====== TIME ", end.Sub(start).Milliseconds())
 
-	router.GET("/upload", func(c *gin.Context) {
+	router.POST("/upload", func(c *gin.Context) {
 		usecase.InsertWeather(weatherList)
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
+		})
+	})
+
+	router.POST("/validate", func(c *gin.Context) {
+		data, err := usecase.ValidateWeatherData(weatherList)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"message": err.Error(),
+			})
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"data": data,
 		})
 	})
 
